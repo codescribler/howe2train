@@ -54,12 +54,14 @@ const DATA = {
   ],
 
   sessions: [
-    { id: 'ses-1', title: 'U9 Saturday Skills', date: '2026-02-21', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U9', capacity: 16, booked: 11, price: 55, description: 'Ball mastery, close control and small-sided games.' },
-    { id: 'ses-2', title: 'U11 Passing & Movement', date: '2026-02-22', time: '10:00', location: 'Riverside 3G Pitch', ageGroup: 'U11', capacity: 16, booked: 14, price: 60, description: 'Developing quick passing combinations and off-the-ball movement.' },
-    { id: 'ses-3', title: 'U12 Shooting Masterclass', date: '2026-02-22', time: '14:00', location: 'Greens Playing Fields', ageGroup: 'U12', capacity: 12, booked: 8, price: 65, description: 'Finishing from all angles — technique, placement and power.' },
-    { id: 'ses-4', title: 'U9 Fitness & Agility', date: '2026-02-28', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U9', capacity: 20, booked: 6, price: 55, description: 'Plyometrics, ladders, hurdles and fun fitness challenges.' },
-    { id: 'ses-5', title: 'Half-Term Camp Day 1', date: '2026-03-02', time: '09:30', location: 'Riverside 3G Pitch', ageGroup: 'All', capacity: 30, booked: 22, price: 120, description: 'Full day camp — skills, games, tournaments and prizes. Bring lunch and water.' },
-    { id: 'ses-6', title: 'U8 First Kicks', date: '2026-02-23', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U8', capacity: 12, booked: 12, price: 45, description: 'Fun introductory session for our youngest players.' },
+    { id: 'ses-1', title: 'U9 Saturday Skills', date: '2026-02-21', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U9', sessionType: 'group', capacity: 16, booked: 11, price: 30, description: 'Ball mastery, close control and small-sided games.' },
+    { id: 'ses-2', title: 'U11 Passing & Movement', date: '2026-02-22', time: '10:00', location: 'Riverside 3G Pitch', ageGroup: 'U11', sessionType: 'group', capacity: 16, booked: 14, price: 30, description: 'Developing quick passing combinations and off-the-ball movement.' },
+    { id: 'ses-3', title: 'U12 Shooting Masterclass', date: '2026-02-22', time: '14:00', location: 'Greens Playing Fields', ageGroup: 'U12', sessionType: 'group', capacity: 12, booked: 8, price: 30, description: 'Finishing from all angles — technique, placement and power.' },
+    { id: 'ses-4', title: 'U9 Fitness & Agility', date: '2026-02-28', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U9', sessionType: 'group', capacity: 20, booked: 6, price: 30, description: 'Plyometrics, ladders, hurdles and fun fitness challenges.' },
+    { id: 'ses-5', title: 'Half-Term Camp Day 1', date: '2026-03-02', time: '09:30', location: 'Riverside 3G Pitch', ageGroup: 'All', sessionType: 'group', capacity: 30, booked: 22, price: 30, description: 'Full day camp — skills, games, tournaments and prizes. Bring lunch and water.' },
+    { id: 'ses-6', title: 'U8 First Kicks', date: '2026-02-23', time: '09:00', location: 'Riverside 3G Pitch', ageGroup: 'U8', sessionType: 'group', capacity: 12, booked: 12, price: 30, description: 'Fun introductory session for our youngest players.' },
+    { id: 'ses-7', title: '1-to-1: Technical Development', date: '2026-02-25', time: '16:00', location: 'Riverside 3G Pitch', ageGroup: 'All', sessionType: '1-to-1', capacity: 1, booked: 1, price: 60, description: 'Personalised session focused on individual technical development. Tailored to your child\'s needs.' },
+    { id: 'ses-8', title: '2-to-1: Passing & Combination Play', date: '2026-02-26', time: '17:00', location: 'Riverside 3G Pitch', ageGroup: 'All', sessionType: '2-to-1', capacity: 2, booked: 1, price: 70, description: 'Intensive small-group session for two players working on passing combinations and link-up play.' },
   ],
 
   bookings: [
@@ -175,15 +177,15 @@ const DATA = {
     ],
     shopRevenue: 2846.50,
     recentTransactions: [
-      { parent: 'Sarah Mitchell', item: 'U9 Saturday Skills (session)', amount: 55.00, date: '2026-02-13', type: 'session' },
+      { parent: 'Sarah Mitchell', item: 'U9 Saturday Skills (group session)', amount: 30.00, date: '2026-02-13', type: 'session' },
       { parent: 'James Carter', item: 'Power Shooting (package)', amount: 14.99, date: '2026-02-12', type: 'package' },
       { parent: 'Laura Bennett', item: 'Howe2Train Hoodie — Youth L', amount: 34.99, date: '2026-02-12', type: 'shop' },
-      { parent: 'Mark Thompson', item: 'U12 Shooting Masterclass (session)', amount: 65.00, date: '2026-02-11', type: 'session' },
-      { parent: 'Emma Wilson', item: 'Half-Term Camp Day 1 (session)', amount: 120.00, date: '2026-02-11', type: 'session' },
+      { parent: 'Mark Thompson', item: 'U12 Shooting Masterclass (group session)', amount: 30.00, date: '2026-02-11', type: 'session' },
+      { parent: 'Emma Wilson', item: 'Half-Term Camp Day 1 (group session)', amount: 30.00, date: '2026-02-11', type: 'session' },
       { parent: 'David Brown', item: 'Cone Work: Close Control (package)', amount: 11.99, date: '2026-02-10', type: 'package' },
       { parent: 'Sarah Mitchell', item: 'Howe2Train Snapback Cap', amount: 18.99, date: '2026-02-10', type: 'shop' },
-      { parent: 'James Carter', item: 'U11 Passing & Movement (session)', amount: 60.00, date: '2026-02-09', type: 'session' },
-      { parent: 'Laura Bennett', item: 'Academy Prep Fitness (package)', amount: 24.99, date: '2026-02-08', type: 'package' },
+      { parent: 'James Carter', item: 'U11 Passing & Movement (group session)', amount: 30.00, date: '2026-02-09', type: 'session' },
+      { parent: 'Laura Bennett', item: '1-to-1: Technical Development', amount: 60.00, date: '2026-02-08', type: 'session' },
       { parent: 'Mark Thompson', item: 'Training Football — Size 4', amount: 22.99, date: '2026-02-07', type: 'shop' },
     ]
   },

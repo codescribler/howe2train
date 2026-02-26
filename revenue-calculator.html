@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#C5A55A">
+  <title>Howe2Train — Revenue Calculator</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              DEFAULT: '#C5A55A',
+              light: '#D4B96E',
+              dark: '#A8893E',
+              faint: 'rgba(197,165,90,0.08)',
+              subtle: 'rgba(197,165,90,0.15)',
+            },
+            dark: {
+              DEFAULT: '#0A0A0A',
+              card: '#141414',
+              surface: '#1A1A1A',
+              border: '#2A2A2A',
+              hover: '#222222',
+            }
+          },
+          fontFamily: {
+            display: ['Barlow Condensed', 'sans-serif'],
+            body: ['Barlow', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #0A0A0A; margin: 0; }
+
+    /* Custom range slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1A1A1A;
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #C5A55A;
+      border: 3px solid #0A0A0A;
+      box-shadow: 0 0 8px rgba(197,165,90,0.4);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 14px rgba(197,165,90,0.6);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #C5A55A;
+      border: 3px solid #0A0A0A;
+      box-shadow: 0 0 8px rgba(197,165,90,0.4);
+      cursor: pointer;
+    }
+
+    /* Animate value changes */
+    .value-display {
+      transition: transform 0.15s ease;
+    }
+    .value-display.bump {
+      transform: scale(1.08);
+    }
+
+    /* Glow card on hover */
+    .glow-card {
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glow-card:hover {
+      border-color: rgba(197,165,90,0.3);
+      box-shadow: 0 0 20px rgba(197,165,90,0.05);
+    }
+
+    /* Revenue tier badges */
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Shimmer on hero number */
+    @keyframes goldShimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .shimmer { animation: goldShimmer 3s ease-in-out infinite; }
+
+    /* Fade in sections */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up {
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .fade-up-1 { animation-delay: 0.05s; }
+    .fade-up-2 { animation-delay: 0.15s; }
+    .fade-up-3 { animation-delay: 0.25s; }
+    .fade-up-4 { animation-delay: 0.35s; }
+    .fade-up-5 { animation-delay: 0.45s; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0A0A0A; }
+    ::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 999px; }
+  </style>
+</head>
+
+<body class="font-body text-white antialiased min-h-screen">
+  <div class="max-w-2xl mx-auto px-4 py-8 pb-16">
+
+    <!-- Header -->
+    <div class="fade-up fade-up-1 mb-10 text-center">
+      <p class="text-gold text-sm font-semibold tracking-widest uppercase mb-2">Howe2Train</p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold leading-tight">Revenue Calculator</h1>
+      <p class="text-gray-400 mt-3 text-sm max-w-md mx-auto">See how much your coaching business could earn each month — and how digital products scale your income.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SECTION 1: COACHING REVENUE                -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="fade-up fade-up-2 mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center">
+          <i data-lucide="calendar" class="w-5 h-5 text-gold"></i>
+        </div>
+        <h2 class="font-display text-2xl font-bold">Coaching Sessions</h2>
+      </div>
+
+      <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+        <p class="text-gray-500 text-xs uppercase tracking-wider mb-4">Sessions per week</p>
+
+        <!-- 1-to-1 -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-gold/15 text-gold">1-to-1</span>
+              <span class="text-gray-500 text-xs">£60 per session</span>
+            </div>
+            <span class="font-display text-lg font-bold text-gold value-display" id="v-121"><span id="n-121">3</span> <span class="text-sm font-normal text-gray-500">sessions/wk</span></span>
+          </div>
+          <input type="range" id="r-121" min="0" max="15" value="3" oninput="calc()">
+        </div>
+
+        <!-- 2-to-1 -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-blue-500/15 text-blue-400">2-to-1</span>
+              <span class="text-gray-500 text-xs">£70 per session</span>
+            </div>
+            <span class="font-display text-lg font-bold text-blue-400 value-display" id="v-221"><span id="n-221">2</span> <span class="text-sm font-normal text-gray-500">sessions/wk</span></span>
+          </div>
+          <input type="range" id="r-221" min="0" max="15" value="2" oninput="calc()">
+        </div>
+
+        <!-- Group -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-purple-500/15 text-purple-400">Group</span>
+              <span class="text-gray-500 text-xs">£30 per player</span>
+            </div>
+            <span class="font-display text-lg font-bold text-purple-400 value-display" id="v-grp"><span id="n-grp">4</span> <span class="text-sm font-normal text-gray-500">sessions/wk</span></span>
+          </div>
+          <input type="range" id="r-grp" min="0" max="15" value="4" oninput="calc()">
+        </div>
+
+        <!-- Players per group -->
+        <div class="mb-2">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-gray-400 text-sm">Avg. players per group session</span>
+            <span class="font-display text-lg font-bold text-white value-display" id="v-ppg"><span id="n-ppg">10</span> <span class="text-sm font-normal text-gray-500">players</span></span>
+          </div>
+          <input type="range" id="r-ppg" min="4" max="30" value="10" oninput="calc()">
+        </div>
+
+        <!-- Coaching result -->
+        <div class="mt-5 pt-5 border-t border-dark-border flex items-end justify-between">
+          <div>
+            <p class="text-gray-500 text-xs uppercase tracking-wider">Monthly coaching revenue</p>
+            <p class="font-display text-3xl font-bold text-gold mt-1" id="coaching-total">£0</p>
+          </div>
+          <p class="text-gray-500 text-sm" id="coaching-annual">£0/year</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SECTION 2: DIGITAL PRODUCTS GROWTH         -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="fade-up fade-up-3 mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center">
+          <i data-lucide="trending-up" class="w-5 h-5 text-gold"></i>
+        </div>
+        <h2 class="font-display text-2xl font-bold">Digital Products</h2>
+      </div>
+
+      <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+
+        <!-- PDF sales per month -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-emerald-500/15 text-emerald-400">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF Guides
+              </span>
+              <span class="text-gray-600 text-xs">One-off purchase</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mb-1 mt-3">
+            <span class="text-gray-400 text-sm">Sales per month</span>
+            <span class="font-display text-lg font-bold text-emerald-400 value-display"><span id="n-pdf-start">20</span> <span class="text-sm font-normal text-gray-500">sales/mo</span></span>
+          </div>
+          <input type="range" id="pdf-start" min="0" max="100" value="20" oninput="calc()">
+        </div>
+
+        <div class="border-t border-dark-border my-4"></div>
+
+        <!-- Video starting subs -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-sky-500/15 text-sky-400">
+                <i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Video Courses
+              </span>
+              <span class="text-gray-600 text-xs">Monthly subscription</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mb-1 mt-3">
+            <span class="text-gray-400 text-sm">Starting subscribers</span>
+            <span class="font-display text-lg font-bold text-sky-400 value-display"><span id="n-vid-start">15</span> <span class="text-sm font-normal text-gray-500">subs</span></span>
+          </div>
+          <input type="range" id="vid-start" min="0" max="100" value="15" oninput="calc()">
+        </div>
+
+        <div class="border-t border-dark-border my-4"></div>
+
+        <!-- App starting subs -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <span class="tier-badge bg-gold/15 text-gold">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> App Subscription
+              </span>
+              <span class="text-gray-600 text-xs">Monthly subscription</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mb-1 mt-3">
+            <span class="text-gray-400 text-sm">Starting subscribers</span>
+            <span class="font-display text-lg font-bold text-gold value-display"><span id="n-app-start">10</span> <span class="text-sm font-normal text-gray-500">subs</span></span>
+          </div>
+          <input type="range" id="app-start" min="0" max="100" value="10" oninput="calc()">
+        </div>
+
+        <!-- Digital total -->
+        <div class="mt-5 pt-5 border-t border-dark-border flex items-end justify-between">
+          <div>
+            <p class="text-gray-500 text-xs uppercase tracking-wider">Month 12 digital revenue</p>
+            <p class="font-display text-3xl font-bold text-sky-400 mt-1" id="digital-total">£0</p>
+          </div>
+          <p class="text-gray-500 text-sm" id="digital-annual">£0/year</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SECTION 3: 12-MONTH PROJECTION CHART       -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="fade-up fade-up-4 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-gold"></i>
+          </div>
+          <div>
+            <h2 class="font-display text-2xl font-bold">Projection</h2>
+            <p class="text-gray-500 text-xs" id="chart-range">Months 1–12</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-prev" onclick="changeWindow(-1)" disabled class="w-10 h-10 rounded-xl bg-dark-surface border border-dark-border flex items-center justify-center text-gray-500 disabled:opacity-30 transition-all hover:border-gold hover:text-gold">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <button id="btn-next" onclick="changeWindow(1)" class="w-10 h-10 rounded-xl bg-dark-surface border border-dark-border flex items-center justify-center text-gray-400 transition-all hover:border-gold hover:text-gold">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+        <div class="relative" style="height: 320px;">
+          <canvas id="revenue-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-gradient-to-br from-gold/10 via-dark-card to-dark-card rounded-2xl border border-gold/20 p-6 mt-4">
+        <p class="text-gold text-xs font-semibold tracking-widest uppercase mb-4" id="sum-label">Projected totals at month 12</p>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <p class="text-gray-500 text-xs mb-1">Monthly coaching</p>
+            <p class="font-display text-2xl font-bold text-white" id="sum-coaching">£0</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-xs mb-1">Monthly digital</p>
+            <p class="font-display text-2xl font-bold text-white" id="sum-digital">£0</p>
+          </div>
+        </div>
+
+        <div class="border-t border-gold/20 pt-4 flex items-end justify-between">
+          <div>
+            <p class="text-gray-400 text-xs mb-1">Combined monthly</p>
+            <p class="font-display text-4xl font-bold text-gold shimmer" id="sum-total">£0</p>
+          </div>
+          <div class="text-right">
+            <p class="text-gray-400 text-xs mb-1">Annual projection</p>
+            <p class="font-display text-2xl font-bold text-gold" id="sum-annual">£0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SECTION 4: ASSUMPTIONS                     -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="fade-up fade-up-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center">
+          <i data-lucide="settings" class="w-5 h-5 text-gold"></i>
+        </div>
+        <h2 class="font-display text-2xl font-bold">Assumptions</h2>
+      </div>
+
+      <div class="flex flex-col gap-4">
+
+        <!-- PDF assumptions -->
+        <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="tier-badge bg-emerald-500/15 text-emerald-400">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF Guides
+            </span>
+            <span class="text-gray-600 text-xs">One-off purchase</span>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">Customers buy once — revenue comes from new sales each month.</p>
+          <div class="mb-3">
+            <label class="text-gray-500 text-xs block mb-1">Price per guide</label>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-500">£</span>
+              <input type="number" id="pdf-price" value="9.99" min="0" step="0.01" class="w-full bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-white text-sm focus:border-gold focus:outline-none" oninput="calc()">
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-500 text-xs">Monthly sales growth</span>
+              <span class="text-emerald-400 text-sm font-semibold" id="n-pdf-growth">10%</span>
+            </div>
+            <input type="range" id="r-pdf-growth" min="0" max="50" value="10" oninput="calc()">
+          </div>
+          <div class="mt-4 pt-3 border-t border-dark-border flex justify-between items-center">
+            <span class="text-gray-500 text-xs">Month 12 sales revenue</span>
+            <span class="font-display text-lg font-bold text-emerald-400" id="pdf-m12">£0</span>
+          </div>
+        </div>
+
+        <!-- Video assumptions -->
+        <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="tier-badge bg-sky-500/15 text-sky-400">
+              <i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Video Courses
+            </span>
+            <span class="text-gray-600 text-xs">Monthly subscription</span>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">Access to training videos — subscribers pay monthly.</p>
+          <div class="mb-3">
+            <label class="text-gray-500 text-xs block mb-1">Price / month</label>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-500">£</span>
+              <input type="number" id="vid-price" value="9.99" min="0" step="0.01" class="w-full bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-white text-sm focus:border-gold focus:outline-none" oninput="calc()">
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-500 text-xs">New subscribers / month</span>
+              <span class="text-sky-400 text-sm font-semibold" id="n-vid-growth">12%</span>
+            </div>
+            <input type="range" id="r-vid-growth" min="0" max="50" value="12" oninput="calc()">
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-500 text-xs">Monthly churn (cancellations)</span>
+              <span class="text-red-400 text-sm font-semibold" id="n-vid-churn">3%</span>
+            </div>
+            <input type="range" id="r-vid-churn" min="0" max="30" value="3" oninput="calc()">
+          </div>
+          <div class="mt-4 pt-3 border-t border-dark-border flex justify-between items-center">
+            <span class="text-gray-500 text-xs">Month 12 recurring revenue</span>
+            <span class="font-display text-lg font-bold text-sky-400" id="vid-m12">£0</span>
+          </div>
+        </div>
+
+        <!-- App assumptions -->
+        <div class="bg-dark-card rounded-2xl border border-dark-border p-5 glow-card">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="tier-badge bg-gold/15 text-gold">
+              <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> App Subscription
+            </span>
+            <span class="text-gray-600 text-xs">Monthly subscription</span>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">Videos + progress tracking + adaptive difficulty suggestions. The premium tier.</p>
+          <div class="mb-3">
+            <label class="text-gray-500 text-xs block mb-1">Price / month</label>
+            <div class="flex items-center gap-1">
+              <span class="text-gray-500">£</span>
+              <input type="number" id="app-price" value="14.99" min="0" step="0.01" class="w-full bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-white text-sm focus:border-gold focus:outline-none" oninput="calc()">
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-500 text-xs">New subscribers / month</span>
+              <span class="text-gold text-sm font-semibold" id="n-app-growth">15%</span>
+            </div>
+            <input type="range" id="r-app-growth" min="0" max="50" value="15" oninput="calc()">
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-500 text-xs">Monthly churn (cancellations)</span>
+              <span class="text-red-400 text-sm font-semibold" id="n-app-churn">5%</span>
+            </div>
+            <input type="range" id="r-app-churn" min="0" max="30" value="5" oninput="calc()">
+          </div>
+          <div class="mt-4 pt-3 border-t border-dark-border flex justify-between items-center">
+            <span class="text-gray-500 text-xs">Month 12 recurring revenue</span>
+            <span class="font-display text-lg font-bold text-gold" id="app-m12">£0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ─── Init icons ───
+    lucide.createIcons();
+
+    // ─── State ───
+    const TOTAL_MONTHS = 60; // project 5 years
+    const WINDOW = 12;
+    let windowStart = 0;     // 0 = months 1-12, 12 = months 13-24, etc.
+    let allCoachData = [];
+    let allDigitalData = [];
+    let allPdfData = [];
+    let allVidData = [];
+    let allAppData = [];
+
+    // ─── Chart setup ───
+    const ctx = document.getElementById('revenue-chart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Coaching Sessions',
+            data: [],
+            borderColor: '#C5A55A',
+            backgroundColor: 'rgba(197,165,90,0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: '#C5A55A',
+            pointBorderColor: '#0A0A0A',
+            pointBorderWidth: 2,
+            pointHitRadius: 12,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#C5A55A',
+          },
+          {
+            label: 'Digital Products',
+            data: [],
+            borderColor: '#38BDF8',
+            backgroundColor: 'rgba(56,189,248,0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: '#38BDF8',
+            pointBorderColor: '#0A0A0A',
+            pointBorderWidth: 2,
+            pointHitRadius: 12,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#38BDF8',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              color: '#888',
+              font: { family: 'Barlow', size: 11 },
+              boxWidth: 14,
+              boxHeight: 2,
+              padding: 16,
+              usePointStyle: false,
+            }
+          },
+          tooltip: {
+            backgroundColor: '#141414',
+            borderColor: '#2A2A2A',
+            borderWidth: 1,
+            titleColor: '#fff',
+            titleFont: { family: 'Barlow Condensed', size: 14, weight: 700 },
+            bodyColor: '#999',
+            bodyFont: { family: 'Barlow', size: 12 },
+            padding: 12,
+            cornerRadius: 10,
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            boxPadding: 4,
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.dataset.label + ': £' + ctx.raw.toLocaleString();
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: { color: '#555', font: { family: 'Barlow', size: 11 } },
+            border: { display: false },
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: {
+              color: '#555',
+              font: { family: 'Barlow', size: 11 },
+              callback: v => '£' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v),
+            },
+            border: { display: false },
+            beginAtZero: true,
+          }
+        }
+      }
+    });
+
+    // ─── Window navigation ───
+    function changeWindow(dir) {
+      const newStart = windowStart + (dir * WINDOW);
+      if (newStart < 0 || newStart >= TOTAL_MONTHS) return;
+      windowStart = newStart;
+      updateChart();
+    }
+
+    function updateChart() {
+      const from = windowStart;
+      const to = Math.min(windowStart + WINDOW, TOTAL_MONTHS);
+      const endMonth = to;
+
+      // Labels
+      const labels = [];
+      for (let i = from; i < to; i++) {
+        labels.push('M' + (i + 1));
+      }
+
+      // Slice data for window
+      const coachSlice = allCoachData.slice(from, to);
+      const digitalSlice = allDigitalData.slice(from, to);
+
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = coachSlice;
+      chart.data.datasets[1].data = digitalSlice;
+      chart.update();
+
+      // Update range label
+      document.getElementById('chart-range').textContent = 'Months ' + (from + 1) + '–' + endMonth;
+
+      // Update nav buttons
+      document.getElementById('btn-prev').disabled = (from === 0);
+      document.getElementById('btn-next').disabled = (to >= TOTAL_MONTHS);
+
+      // Update summary to show end-of-window values
+      const lastIdx = to - 1;
+      const coachEnd = allCoachData[lastIdx] || 0;
+      const digitalEnd = Math.round(allDigitalData[lastIdx] || 0);
+      const totalEnd = coachEnd + digitalEnd;
+
+      document.getElementById('sum-label').textContent = 'Projected totals at month ' + endMonth;
+      document.getElementById('sum-coaching').textContent = '£' + coachEnd.toLocaleString();
+      document.getElementById('sum-digital').textContent = '£' + digitalEnd.toLocaleString();
+      document.getElementById('sum-total').textContent = '£' + totalEnd.toLocaleString();
+      document.getElementById('sum-annual').textContent = '£' + (totalEnd * 12).toLocaleString();
+
+      // Re-init icons for the nav buttons
+      lucide.createIcons();
+    }
+
+    // ─── Calculation engine ───
+    function calc() {
+      const WEEKS = 4.33;
+
+      // Read coaching values
+      const s121 = +document.getElementById('r-121').value;
+      const s221 = +document.getElementById('r-221').value;
+      const sGrp = +document.getElementById('r-grp').value;
+      const ppg  = +document.getElementById('r-ppg').value;
+
+      // Update displayed slider values
+      document.getElementById('n-121').textContent = s121;
+      document.getElementById('n-221').textContent = s221;
+      document.getElementById('n-grp').textContent = sGrp;
+      document.getElementById('n-ppg').textContent = ppg;
+
+      // Coaching monthly
+      const coachMonthly = Math.round(((s121 * 60) + (s221 * 70) + (sGrp * ppg * 30)) * WEEKS);
+
+      document.getElementById('coaching-total').textContent = '£' + coachMonthly.toLocaleString();
+      document.getElementById('coaching-annual').textContent = '£' + (coachMonthly * 12).toLocaleString() + '/year';
+
+      // Read digital product values
+
+      // PDF: one-off purchase (new sales each month, no recurring)
+      const pdfPrice  = +document.getElementById('pdf-price').value || 0;
+      const pdfStart  = +document.getElementById('pdf-start').value || 0;
+      const pdfGrowth = +document.getElementById('r-pdf-growth').value / 100;
+
+      // Video: monthly subscription (recurring with churn)
+      const vidPrice  = +document.getElementById('vid-price').value || 0;
+      const vidStart  = +document.getElementById('vid-start').value || 0;
+      const vidGrowth = +document.getElementById('r-vid-growth').value / 100;
+      const vidChurn  = +document.getElementById('r-vid-churn').value / 100;
+
+      // App: monthly subscription (recurring with churn)
+      const appPrice  = +document.getElementById('app-price').value || 0;
+      const appStart  = +document.getElementById('app-start').value || 0;
+      const appGrowth = +document.getElementById('r-app-growth').value / 100;
+      const appChurn  = +document.getElementById('r-app-churn').value / 100;
+
+      // Update slider display labels
+      document.getElementById('n-pdf-start').textContent = pdfStart;
+      document.getElementById('n-vid-start').textContent = vidStart;
+      document.getElementById('n-app-start').textContent = appStart;
+
+      // Update growth/churn labels
+      document.getElementById('n-pdf-growth').textContent = Math.round(pdfGrowth * 100) + '%';
+      document.getElementById('n-vid-growth').textContent = Math.round(vidGrowth * 100) + '%';
+      document.getElementById('n-vid-churn').textContent  = Math.round(vidChurn * 100) + '%';
+      document.getElementById('n-app-growth').textContent = Math.round(appGrowth * 100) + '%';
+      document.getElementById('n-app-churn').textContent  = Math.round(appChurn * 100) + '%';
+
+      // Project all months
+      allCoachData = [];
+      allPdfData = [];
+      allVidData = [];
+      allAppData = [];
+      allDigitalData = [];
+
+      let pdfSalesThisMonth = pdfStart;
+      let vidSubscribers = vidStart;
+      let appSubscribers = appStart;
+
+      for (let m = 0; m < TOTAL_MONTHS; m++) {
+        allCoachData.push(coachMonthly);
+
+        // PDF: one-off — revenue = new sales this month only
+        if (m > 0) {
+          pdfSalesThisMonth = Math.max(0, pdfSalesThisMonth * (1 + pdfGrowth));
+        }
+        const pdfRev = pdfSalesThisMonth * pdfPrice;
+
+        // Video subs: recurring
+        if (m > 0) {
+          vidSubscribers = Math.max(0, vidSubscribers * (1 + vidGrowth - vidChurn));
+        }
+        const vidRev = vidSubscribers * vidPrice;
+
+        // App subs: recurring
+        if (m > 0) {
+          appSubscribers = Math.max(0, appSubscribers * (1 + appGrowth - appChurn));
+        }
+        const appRev = appSubscribers * appPrice;
+
+        allPdfData.push(pdfRev);
+        allVidData.push(vidRev);
+        allAppData.push(appRev);
+        allDigitalData.push(Math.round(pdfRev + vidRev + appRev));
+      }
+
+      // Update month 12 displays in assumptions
+      document.getElementById('pdf-m12').textContent = '£' + Math.round(allPdfData[11]).toLocaleString();
+      document.getElementById('vid-m12').textContent = '£' + Math.round(allVidData[11]).toLocaleString();
+      document.getElementById('app-m12').textContent = '£' + Math.round(allAppData[11]).toLocaleString();
+
+      // Update digital total (above chart)
+      const digitalM12 = Math.round(allDigitalData[11]);
+      document.getElementById('digital-total').textContent = '£' + digitalM12.toLocaleString();
+      document.getElementById('digital-annual').textContent = '£' + (digitalM12 * 12).toLocaleString() + '/year';
+
+      // Update chart for current window
+      updateChart();
+    }
+
+    // Initial calculation
+    calc();
+  </script>
+</body>
+</html>

@@ -76,7 +76,12 @@ Rene can upload training videos directly from his phone camera roll. Each video 
 
 ### 5. Session Management & Booking
 
-Rene can create upcoming coaching sessions with the following details: date, time, location, age group, capacity limit, description, and price (sessions can be free or paid).
+Rene can create upcoming coaching sessions with the following details: date, time, location, age group, session type, capacity limit, description, and price.
+
+**Confirmed session pricing:**
+- **1-to-1** (one player, one coach) — **£60**
+- **2-to-1** (two players, one coach) — **£70**
+- **Group session** — **£30 per player**
 
 **Parent view:** Parents see available sessions filtered to their child's age group. They can book with a single tap. If a session is full, they can join a waiting list.
 
@@ -147,7 +152,7 @@ Notification channels: in-app notification feed and email. Push notifications if
 
 **Awarded Achievement:** id, achievement_id, child_id, awarded_date, note (optional).
 
-**Coaching Session:** id, title, date, time, location, age_group, capacity, price, description.
+**Coaching Session:** id, title, date, time, location, age_group, session_type (1-to-1 / 2-to-1 / group), capacity, price, description.
 
 **Booking:** id, session_id, child_id, status (confirmed/waitlisted/cancelled), booked_at.
 
@@ -205,7 +210,7 @@ These are the key workflows Rene will perform repeatedly. Each must be completab
 
 ## Payment & Pricing Notes
 
-Training packages are one-off purchases at individually set prices (Rene controls pricing per package). Coaching sessions may be free or paid (Rene sets this per session). Payment processing should support card payments with Rene receiving payouts. Rene needs a simple view of earnings — total revenue, breakdown by package, and recent transactions.
+Training packages are one-off purchases at individually set prices (Rene controls pricing per package). Coaching sessions have confirmed pricing: **1-to-1 sessions at £60**, **2-to-1 sessions at £70**, and **group sessions at £30 per player**. Payment processing should support card payments with Rene receiving payouts. Rene needs a simple view of earnings — total revenue, breakdown by package, and recent transactions.
 
 ---
 

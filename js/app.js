@@ -391,7 +391,12 @@ function renderParentSessions() {
             <div class="card-tap bg-dark-card rounded-2xl p-4 border border-dark-border" onclick="APP._sessionId='${s.id}'; navigate('parent-session-detail')">
               <div class="flex justify-between items-start mb-3">
                 <div>
-                  <h3 class="font-display text-lg font-bold">${s.title}</h3>
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="font-display text-lg font-bold">${s.title}</h3>
+                  </div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium ${s.sessionType === '1-to-1' ? 'bg-gold/20 text-gold' : s.sessionType === '2-to-1' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}">${s.sessionType === 'group' ? 'Group' : s.sessionType}</span>
+                  </div>
                   <p class="text-gray-400 text-sm mt-1">${s.description}</p>
                 </div>
                 ${isBooked ? `<span class="flex-shrink-0 text-xs bg-green-500/20 text-green-400 px-2.5 py-1 rounded-full font-medium">Booked</span>` : ''}
@@ -431,7 +436,10 @@ function renderParentSessionDetail() {
       <button onclick="goBack()" class="mt-4 mb-4 text-gray-400 flex items-center gap-2 card-tap w-fit">${icon('arrow-left', 'w-5 h-5')} Back</button>
       <div class="bg-dark-card rounded-2xl overflow-hidden border border-dark-border mb-4">
         <div class="bg-gradient-to-br from-gold/10 to-transparent p-6">
-          <span class="text-gold text-sm font-medium">${s.ageGroup}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-gold text-sm font-medium">${s.ageGroup}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium ${s.sessionType === '1-to-1' ? 'bg-gold/20 text-gold' : s.sessionType === '2-to-1' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}">${s.sessionType === 'group' ? 'Group' : s.sessionType}</span>
+          </div>
           <h1 class="font-display text-3xl font-bold mt-1">${s.title}</h1>
         </div>
         <div class="p-5 flex flex-col gap-4">
@@ -459,7 +467,7 @@ function renderParentSessionDetail() {
           </div>
           <div class="flex items-center justify-between pt-2 border-t border-dark-border">
             <div>
-              <p class="text-gray-500 text-xs">Price per player</p>
+              <p class="text-gray-500 text-xs">${s.sessionType === '1-to-1' ? 'Session price' : s.sessionType === '2-to-1' ? 'Price (2 players)' : 'Price per player'}</p>
               <p class="font-display text-2xl font-bold text-gold">${s.price === 0 ? 'Free' : formatPrice(s.price)}</p>
             </div>
             ${isBooked ? `
@@ -1267,7 +1275,10 @@ function renderCoachSessions() {
         ${DATA.sessions.map(s => `
           <div class="card-tap bg-dark-card rounded-2xl p-4 border border-dark-border">
             <div class="flex items-start justify-between mb-2">
-              <h3 class="font-display text-lg font-bold">${s.title}</h3>
+              <div>
+                <h3 class="font-display text-lg font-bold">${s.title}</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium ${s.sessionType === '1-to-1' ? 'bg-gold/20 text-gold' : s.sessionType === '2-to-1' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}">${s.sessionType === 'group' ? 'Group' : s.sessionType}</span>
+              </div>
               <span class="text-gold font-display font-bold">${s.price === 0 ? 'Free' : formatPrice(s.price)}</span>
             </div>
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400 mb-3">
@@ -1653,6 +1664,14 @@ function openCreateSession() {
           <label class="text-sm text-gray-400 mb-1 block">Location</label>
           <input type="text" placeholder="Riverside 3G Pitch" class="w-full bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-white focus:border-gold focus:outline-none">
         </div>
+        <div>
+          <label class="text-sm text-gray-400 mb-1 block">Session Type</label>
+          <div class="grid grid-cols-3 gap-2" id="sessionTypeSelector">
+            <button type="button" onclick="document.querySelectorAll('#sessionTypeSelector button').forEach(b=>b.classList.remove('border-gold','text-gold'));this.classList.add('border-gold','text-gold');document.getElementById('sessionPrice').value='60';document.getElementById('sessionCapacity').value='1'" class="card-tap bg-dark-surface border border-dark-border rounded-xl py-3 text-sm font-medium text-center focus:outline-none">1-to-1<br><span class='text-gold text-xs'>\u00A360</span></button>
+            <button type="button" onclick="document.querySelectorAll('#sessionTypeSelector button').forEach(b=>b.classList.remove('border-gold','text-gold'));this.classList.add('border-gold','text-gold');document.getElementById('sessionPrice').value='70';document.getElementById('sessionCapacity').value='2'" class="card-tap bg-dark-surface border border-dark-border rounded-xl py-3 text-sm font-medium text-center focus:outline-none">2-to-1<br><span class='text-gold text-xs'>\u00A370</span></button>
+            <button type="button" onclick="document.querySelectorAll('#sessionTypeSelector button').forEach(b=>b.classList.remove('border-gold','text-gold'));this.classList.add('border-gold','text-gold');document.getElementById('sessionPrice').value='30';document.getElementById('sessionCapacity').value='16'" class="card-tap bg-dark-surface border border-gold text-gold rounded-xl py-3 text-sm font-medium text-center focus:outline-none">Group<br><span class='text-gold text-xs'>\u00A330pp</span></button>
+          </div>
+        </div>
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="text-sm text-gray-400 mb-1 block">Age Group</label>
@@ -1662,11 +1681,11 @@ function openCreateSession() {
           </div>
           <div>
             <label class="text-sm text-gray-400 mb-1 block">Capacity</label>
-            <input type="number" value="16" class="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-3 text-white focus:border-gold focus:outline-none">
+            <input id="sessionCapacity" type="number" value="16" class="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-3 text-white focus:border-gold focus:outline-none">
           </div>
           <div>
-            <label class="text-sm text-gray-400 mb-1 block">Price</label>
-            <input type="number" value="8" step="0.01" class="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-3 text-white focus:border-gold focus:outline-none">
+            <label class="text-sm text-gray-400 mb-1 block">Price (\u00A3)</label>
+            <input id="sessionPrice" type="number" value="30" step="0.01" class="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-3 text-white focus:border-gold focus:outline-none">
           </div>
         </div>
         <div>
